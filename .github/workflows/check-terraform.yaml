@@ -37,6 +37,12 @@ jobs:
         run: |
           terraform version
           tflint --version
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: eu-west-1
 
       # Checks
       - name: Check terraform format for ${{ inputs.path }}
@@ -50,20 +56,11 @@ jobs:
         working-directory: ${{ inputs.path }}
         run: |
           terraform init -upgrade
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
       - name: Lint ${{ inputs.path }}
         working-directory: ${{ inputs.path }}
         run: |
           tflint
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
       - name: Check plan for ${{ inputs.path }}
         working-directory: ${{ inputs.path }}
         run: |
           terraform plan -lock=false
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
