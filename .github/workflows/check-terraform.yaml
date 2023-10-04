@@ -25,7 +25,7 @@ jobs:
         # Checkout repo before running rtx
         with:
           ref: ${{ github.head_ref }}
-          token: ${{ secrets.PAT_ATTEST_CI_ADMIN }}
+          token: ${{ secrets.PAT_ATTEST_ADMIN_CI }}
       - name: Install Terraform and tflint using rtx
         # This reads .tool-versions from repo root
         uses: jdxcode/rtx-action@v1
