@@ -24,11 +24,13 @@ jobs:
       - uses: actions/checkout@v3
         # Checkout repo before running rtx
         with:
-          ref: ${{ github.head_ref }}
           token: ${{ secrets.PAT_ATTEST_ADMIN_CI }}
       - name: Install Terraform and tflint using rtx
-        # This reads .tool-versions from repo root
         uses: jdxcode/rtx-action@v1
+        with:
+          tool_versions: |
+            terraform 1.4.5
+            tflint 0.30.0
       - name: Install aws-iam-authenticator
         run: |
           curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/aws-iam-authenticator
