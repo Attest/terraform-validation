@@ -3,8 +3,8 @@ name: Check Terraform changes
 on:
   workflow_call:
     inputs:
-      env:
-        description: 'The environment to be validated, e.g. service or ci'
+      path:
+        description: 'The path to the environment to be validated, e.g. .infra/terraform/service'
         type: string
         required: true
     secrets:
@@ -17,7 +17,7 @@ on:
 
 jobs:
   check-envs:
-    name: "Check Terraform env: ${{ inputs.env }}"
+    name: "Check Terraform env: ${{ inputs.path }}"
     runs-on: "ubuntu-latest"
     steps:
       # Setup
@@ -41,29 +41,29 @@ jobs:
           tflint --version
 
       # Checks
-      - name: Check terraform format for ${{ inputs.env }}
-        working-directory: .infra/terraform/${{ matrix.env }}
+      - name: Check terraform format for ${{ inputs.path }}
+        working-directory: ${{ inputs.path }}
         run: |
           terraform fmt -recursive -diff -write=false -check .
       - name: Debug
         run: |
-          rm .infra/terraform/${{ inputs.env }}/.terraform.lock.hcl
-      - name: Terraform init ${{ inputs.env }}
-        working-directory: .infra/terraform/${{ inputs.env }}
+          rm ${{ inputs.path }}/.terraform.lock.hcl
+      - name: Terraform init ${{ inputs.path }}
+        working-directory: ${{ inputs.path }}
         run: |
           terraform init -upgrade
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      - name: Lint ${{ inputs.env }}
-        working-directory: .infra/terraform/${{ inputs.env }}
+      - name: Lint ${{ inputs.path }}
+        working-directory: ${{ inputs.path }}
         run: |
           tflint
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      - name: Check plan for ${{ inputs.env }}
-        working-directory: .infra/terraform/${{ inputs.env }}
+      - name: Check plan for ${{ inputs.path }}
+        working-directory: ${{ inputs.path }}
         run: |
           terraform plan -lock=false
         env:
