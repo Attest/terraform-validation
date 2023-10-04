@@ -12,8 +12,6 @@ on:
         required: true
       AWS_SECRET_KEY:
         required: true
-      PAT_ATTEST_ADMIN_CI:
-        required: true
 
 jobs:
   check-envs:
@@ -23,8 +21,6 @@ jobs:
       # Setup
       - uses: actions/checkout@v3
         # Checkout repo before running rtx
-        with:
-          token: ${{ secrets.PAT_ATTEST_ADMIN_CI }}
       - name: Install Terraform and tflint using rtx
         uses: jdxcode/rtx-action@v1
         with:
