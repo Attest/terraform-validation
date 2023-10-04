@@ -1,0 +1,71 @@
+name: Check Terraform changes
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: 'The environment to be validated, e.g. service or ci'
+        type: string
+        required: true
+    secrets:
+      AWS_ACCESS_KEY:
+        required: true
+      AWS_SECRET_KEY:
+        required: true
+      PAT_ATTEST_ADMIN_CI:
+        required: true
+
+jobs:
+  check-envs:
+    name: "Check Terraform env: ${{ inputs.env }}"
+    runs-on: "ubuntu-latest"
+    steps:
+      # Setup
+      - uses: actions/checkout@v3
+        # Checkout repo before running rtx
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.PAT_ATTEST_CI_ADMIN }}
+      - name: Install Terraform and tflint using rtx
+        # This reads .tool-versions from repo root
+        uses: jdxcode/rtx-action@v1
+      - name: Install aws-iam-authenticator
+        run: |
+          curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/aws-iam-authenticator
+          chmod +x ./aws-iam-authenticator
+          sudo mv ./aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
+          aws-iam-authenticator version
+      - name: Check versions
+        run: |
+          terraform version
+          tflint --version
+
+      # Checks
+      - name: Check terraform format for ${{ inputs.env }}
+        working-directory: .infra/terraform/${{ matrix.env }}
+        run: |
+          terraform fmt -recursive -diff -write=false -check .
+      - name: Debug
+        run: |
+          rm .infra/terraform/${{ inputs.env }}/.terraform.lock.hcl
+      - name: Terraform init ${{ inputs.env }}
+        working-directory: .infra/terraform/${{ inputs.env }}
+        run: |
+          terraform init -upgrade
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      - name: Lint ${{ inputs.env }}
+        working-directory: .infra/terraform/${{ inputs.env }}
+        run: |
+          tflint
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      - name: Check plan for ${{ inputs.env }}
+        working-directory: .infra/terraform/${{ inputs.env }}
+        run: |
+          terraform plan -lock=false
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
