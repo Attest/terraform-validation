@@ -70,7 +70,10 @@ jobs:
         working-directory: ${{ inputs.path }}
         run: |
           terraform init -upgrade
-      - name: Check plan for ${{ inputs.path }}
-        working-directory: ${{ inputs.path }}
-        run: |
-          terraform plan -lock=false
+    ##########################################
+    # Commented out until perm issues sorted #
+    ##########################################
+    #- name: Check plan for ${{ inputs.path }}
+    #  working-directory: ${{ inputs.path }}
+    #  run: |
+    #    terraform plan -lock=false
