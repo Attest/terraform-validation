@@ -12,6 +12,11 @@ on:
         required: true
       AWS_SECRET_KEY:
         required: true
+      GITHUB_USERNAME:
+        required: true
+      PAT_ATTEST_ADMIN_CI:
+        required: true
+          
 
 jobs:
   check-envs:
@@ -52,14 +57,19 @@ jobs:
       - name: Debug
         run: |
           rm ${{ inputs.path }}/.terraform.lock.hcl
-      - name: Terraform init ${{ inputs.path }}
-        working-directory: ${{ inputs.path }}
-        run: |
-          terraform init -upgrade
       - name: Lint ${{ inputs.path }}
         working-directory: ${{ inputs.path }}
         run: |
           tflint
+      - name: update tf github remotes
+        working-directory: ${{ inputs.path }}
+        run: |
+          sed -i "s/git::git@github\.com:/git::https:\/\/${{ secrets.GITHUB_USERNAME }}:${{ secrets.PAT_ATTEST_ADMIN_CI }}@github\.com\//g" *.tf
+          sed -i "s/git@github\.com:/git::https:\/\/${{ secrets.GITHUB_USERNAME }}:${{ secrets.PAT_ATTEST_ADMIN_CI }}@github\.com\//g" *.tf
+      - name: Terraform init ${{ inputs.path }}
+        working-directory: ${{ inputs.path }}
+        run: |
+          terraform init -upgrade
       - name: Check plan for ${{ inputs.path }}
         working-directory: ${{ inputs.path }}
         run: |
