@@ -27,9 +27,11 @@ jobs:
       - uses: actions/checkout@v3
         # Checkout repo before running rtx
       - name: Install Terraform and tflint using rtx
-        uses: jdxcode/rtx-action@v1
+        uses: jdx/mise-action@v2
         with:
-          tool_versions: |
+          version: 2024.1.14
+          mise: |
+            [tools]
             terraform 1.4.5
             tflint 0.30.0
       - name: Install aws-iam-authenticator
