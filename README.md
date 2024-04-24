@@ -22,6 +22,8 @@ jobs:
     secrets:
       AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
       AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      GITHUB_USERNAME: "attest-admin"
+      PAT_ATTEST_ADMIN_CI: ${{ secrets.PAT_ATTEST_ADMIN_CI }}
 ```
 
 Take note of the `paths` variable in the `on` definition that defines what files need to change in order for this workflow to run. Also take note of the `matrix.path` variable that is set, this is what defines where your terraform definitions are that need to be checked.
